@@ -1,0 +1,30 @@
+services:
+  mediamtx:
+    build: .
+    container_name: cerberus-mediamtx
+    ports:
+      # RTSP
+      - "8555:8555"
+      # HLS
+      - "8888:8888"
+      # WebRTC HTTP
+      - "8889:8889"
+      # WebRTC UDP/TCP
+      - "8189:8189/udp"
+      - "8189:8189/tcp"
+      # SRT (Pipeline 2 publishes here)
+      - "9000:9000/udp"
+      # API
+      - "9997:9997"
+      # Metrics (Prometheus)
+      - "9998:9998"
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+      - ./web:/web:ro
+    restart: unless-stopped
+    networks:
+      - cerberus-net
+
+networks:
+  cerberus-net:
+    driver: bridge

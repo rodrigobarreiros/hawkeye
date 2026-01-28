@@ -1,0 +1,89 @@
+# MediaMTX Configuration for Hawkeye Video Pipeline
+# Documentation: https://github.com/bluenviron/mediamtx
+
+###############################################
+# Global settings
+###############################################
+
+# Logging level (debug, info, warn, error)
+logLevel: info
+logDestinations: [stdout]
+
+# Read timeout
+readTimeout: 10s
+# Write timeout
+writeTimeout: 10s
+# Read buffer count
+readBufferCount: 512
+
+# Authentication (internal for demo)
+authInternalUsers:
+  - user: any
+    pass: ""
+    permissions:
+      - action: publish
+      - action: read
+      - action: playback
+      - action: api
+      - action: metrics
+
+###############################################
+# API (for monitoring)
+###############################################
+
+api: yes
+apiAddress: :9997
+metrics: yes
+metricsAddress: :9998
+
+###############################################
+# SRT Server (receives from Pipeline 2)
+###############################################
+
+srt: yes
+srtAddress: :9000
+
+###############################################
+# RTSP Server (optional, for debugging)
+###############################################
+
+rtsp: yes
+rtspAddress: :8555
+
+###############################################
+# WebRTC Server (browser playback)
+###############################################
+
+webrtc: yes
+webrtcAddress: :8889
+webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: :8189
+
+###############################################
+# HLS Server (browser playback fallback)
+###############################################
+
+hls: yes
+hlsAddress: :8888
+hlsVariant: mpegts
+hlsSegmentCount: 3
+hlsSegmentDuration: 1s
+hlsSegmentMaxSize: 50M
+hlsAllowOrigins: ['*']
+hlsAlwaysRemux: yes
+
+###############################################
+# Paths (stream configurations)
+###############################################
+
+paths:
+  # Main camera stream - receives SRT from Pipeline 2
+  cam1:
+    source: publisher
+    sourceOnDemandCloseAfter: 30s
+    # SRT publish URL: srt://localhost:9000?streamid=publish:cam1
+    # SRT read URL: srt://localhost:9000?streamid=read:cam1
+
+  # Allow any path for flexibility
+  all_others:
+    source: publisher

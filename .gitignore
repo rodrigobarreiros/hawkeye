@@ -1,0 +1,8 @@
+/target
+pipeline-rtsp-to-srt/target/
+pipeline-rtsp/target/
+venv/
+.DS_Store
+.code-workspace
+.coderabbitignore
+coderabbit.yaml
