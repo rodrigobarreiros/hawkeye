@@ -154,8 +154,11 @@ ffplay "srt://127.0.0.1:9000?streamid=read:cam1"
 
 ```
 hawkeye/
-├── docker-compose.yml              # Orchestrates all 4 services
+├── docker-compose.yml              # Orchestrates all services
 ├── README.md                       # Documentation
+├── docs/                           # Additional documentation
+│   ├── architecture-decision-records.md  # ADRs
+│   └── topology.png                # Architecture diagram
 ├── pipeline-rtsp/                  # Pipeline 1: File → RTSP
 │   ├── Cargo.toml
 │   ├── Dockerfile
@@ -305,7 +308,8 @@ pub fn run_with_reconnect(&mut self) -> Result<()> {
     let mut current_backoff = self.backoff_policy.initial_delay();  // 1s
 
     while self.running.load(Ordering::SeqCst) {
-        match self.bridge.run_once() {
+        // Pass shutdown signal to bridge for responsive termination
+        match self.bridge.run_once_with_shutdown(self.running.clone()) {
             Ok(()) => {
                 // EOS (end of stream) - reconnect immediately, reset backoff
                 current_backoff = self.backoff_policy.initial_delay();
@@ -381,16 +385,24 @@ paths:
 ### Metrics and Monitoring
 
 **Pipeline 1 (port 9001):**
-- `rtsp_active_sessions` - Current streaming sessions
-- `rtsp_client_connections_total` - Cumulative connections
-- `/health` - Simple OK endpoint
+- `rtsp_active_sessions` - Current server-side streaming sessions
+- `rtsp_active_clients` - Currently connected RTSP clients
+- `rtsp_client_connections_total` - Cumulative connections since start
+- `/health` - JSON health status with service info and version
+- `/livez` - Kubernetes liveness probe (simple OK)
+- `/readyz` - Kubernetes readiness probe (JSON)
+- `/metrics` - Prometheus metrics endpoint
 
 **Pipeline 2 (port 9002):**
 - `rtsp_srt_connection_state` - 0=Idle, 1=Connecting, 2=Streaming, 3=Reconnecting, 4=Failed
 - `reconnect_attempts_total` - Total reconnection attempts
 - `reconnect_backoff_seconds` - Current backoff delay
 - `pipeline_uptime_seconds` - Time since streaming started
-- `/health` - Simple OK endpoint
+- `srt_publish_state` - SRT connection state (0=disconnected, 1=connected)
+- `/health` - JSON health status with service info and version
+- `/livez` - Kubernetes liveness probe (simple OK)
+- `/readyz` - Kubernetes readiness probe (JSON)
+- `/metrics` - Prometheus metrics endpoint
 
 **MediaMTX (port 9998):**
 - Standard MediaMTX Prometheus metrics
