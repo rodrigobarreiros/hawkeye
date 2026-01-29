@@ -1,7 +1,7 @@
 services:
   mediamtx:
     build: .
-    container_name: cerberus-mediamtx
+    container_name: hawkeye-mediamtx
     ports:
       # RTSP
       - "8555:8555"
@@ -23,8 +23,8 @@ services:
       - ./web:/web:ro
     restart: unless-stopped
     networks:
-      - cerberus-net
+      - hawkeye-net
 
 networks:
-  cerberus-net:
+  hawkeye-net:
     driver: bridge

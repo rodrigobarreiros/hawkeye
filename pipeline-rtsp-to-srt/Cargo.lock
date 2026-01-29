@@ -951,7 +951,6 @@ dependencies = [
  "clap",
  "glib",
  "gstreamer",
- "lazy_static",
  "prometheus",
  "serde",
  "serde_json",

@@ -2,13 +2,13 @@ services:
   # Web Dashboard
   web:
     image: nginx:alpine
-    container_name: cerberus-web
+    container_name: hawkeye-web
     ports:
       - "8080:80"
     volumes:
       - ./server/web:/usr/share/nginx/html:ro
     networks:
-      - cerberus-net
+      - hawkeye-net
     restart: unless-stopped
 
   # Pipeline 1: File → RTSP
@@ -16,14 +16,14 @@ services:
     build:
       context: ./pipeline-rtsp
       dockerfile: Dockerfile
-    container_name: cerberus-pipeline-rtsp
+    container_name: hawkeye-pipeline-rtsp
     ports:
       - "8554:8554"
       - "9001:9001"  # Metrics/health endpoint
     environment:
       - VIDEO_PATH=/app/resources/camera2_fixed.mp4
     networks:
-      - cerberus-net
+      - hawkeye-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:9001/livez || exit 1"]
@@ -38,7 +38,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: cerberus-mediamtx
+    container_name: hawkeye-mediamtx
     ports:
       # RTSP (optional re-streaming)
       - "8555:8555"
@@ -59,7 +59,7 @@ services:
       - ./server/mediamtx.yml:/mediamtx.yml:ro
       - ./server/web:/web:ro
     networks:
-      - cerberus-net
+      - hawkeye-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "/mediamtx", "--help"]
@@ -73,7 +73,7 @@ services:
     build:
       context: ./pipeline-rtsp-to-srt
       dockerfile: Dockerfile
-    container_name: cerberus-pipeline-rtsp-to-srt
+    container_name: hawkeye-pipeline-rtsp-to-srt
     ports:
       - "9002:9002"  # Metrics/health endpoint
     environment:
@@ -87,7 +87,7 @@ services:
       mediamtx:
         condition: service_healthy
     networks:
-      - cerberus-net
+      - hawkeye-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:9002/livez || exit 1"]
@@ -97,5 +97,5 @@ services:
       start_period: 15s
 
 networks:
-  cerberus-net:
+  hawkeye-net:
     driver: bridge

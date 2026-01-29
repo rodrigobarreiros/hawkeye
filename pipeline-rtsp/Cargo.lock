@@ -1136,7 +1136,6 @@ dependencies = [
  "glib",
  "gstreamer",
  "gstreamer-rtsp-server",
- "lazy_static",
  "prometheus",
  "serde",
  "serde_json",

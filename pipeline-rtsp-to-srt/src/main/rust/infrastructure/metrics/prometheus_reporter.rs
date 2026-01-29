@@ -1,42 +1,50 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
+
 use prometheus::{Encoder, Gauge, IntCounter, IntGauge, Registry, TextEncoder};
 
 use crate::domain::ports::MetricsReporter;
 use crate::domain::value_objects::ConnectionState;
 
-lazy_static! {
-    pub static ref REGISTRY: Registry = Registry::new();
+pub static REGISTRY: LazyLock<Registry> = LazyLock::new(Registry::new);
 
-    // Connection state (0=Idle, 1=Connecting, 2=Streaming, 3=Reconnecting, 4=Failed)
-    pub static ref CONNECTION_STATE: Gauge = Gauge::new(
-        "rtsp_srt_connection_state",
-        "Current connection state"
-    ).expect("metric can be created");
+// Connection state (0=Idle, 1=Connecting, 2=Streaming, 3=Reconnecting, 4=Failed)
+pub static CONNECTION_STATE: LazyLock<Gauge> = LazyLock::new(|| {
+    Gauge::new("rtsp_srt_connection_state", "Current connection state")
+        .expect("metric can be created")
+});
 
-    // Total reconnection attempts
-    pub static ref RECONNECT_ATTEMPTS: IntCounter = IntCounter::new(
+// Total reconnection attempts
+pub static RECONNECT_ATTEMPTS: LazyLock<IntCounter> = LazyLock::new(|| {
+    IntCounter::new(
         "reconnect_attempts_total",
-        "Total number of reconnection attempts"
-    ).expect("metric can be created");
+        "Total number of reconnection attempts",
+    )
+    .expect("metric can be created")
+});
 
-    // Current backoff delay in seconds
-    pub static ref BACKOFF_SECONDS: Gauge = Gauge::new(
+// Current backoff delay in seconds
+pub static BACKOFF_SECONDS: LazyLock<Gauge> = LazyLock::new(|| {
+    Gauge::new(
         "reconnect_backoff_seconds",
-        "Current reconnection backoff delay"
-    ).expect("metric can be created");
+        "Current reconnection backoff delay",
+    )
+    .expect("metric can be created")
+});
 
-    // Pipeline uptime
-    pub static ref UPTIME_SECONDS: Gauge = Gauge::new(
+// Pipeline uptime
+pub static UPTIME_SECONDS: LazyLock<Gauge> = LazyLock::new(|| {
+    Gauge::new(
         "pipeline_uptime_seconds",
-        "Time since pipeline started streaming"
-    ).expect("metric can be created");
+        "Time since pipeline started streaming",
+    )
+    .expect("metric can be created")
+});
 
-    // SRT publish state (0=disconnected, 1=connected)
-    pub static ref SRT_PUBLISH_STATE: IntGauge = IntGauge::new(
-        "srt_publish_state",
-        "SRT publish connection state"
-    ).expect("metric can be created");
-}
+// SRT publish state (0=disconnected, 1=connected)
+pub static SRT_PUBLISH_STATE: LazyLock<IntGauge> = LazyLock::new(|| {
+    IntGauge::new("srt_publish_state", "SRT publish connection state")
+        .expect("metric can be created")
+});
 
 pub struct PrometheusReporter;
 

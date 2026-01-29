@@ -1,28 +1,39 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
+
 use prometheus::{Encoder, IntCounter, IntGauge, Registry, TextEncoder};
 
 use crate::domain::entities::StreamSession;
 use crate::domain::ports::MetricsReporter;
 
-lazy_static! {
-    pub static ref REGISTRY: Registry = Registry::new();
-    pub static ref ACTIVE_SESSIONS: IntGauge = IntGauge::new(
+pub static REGISTRY: LazyLock<Registry> = LazyLock::new(Registry::new);
+pub static ACTIVE_SESSIONS: LazyLock<IntGauge> = LazyLock::new(|| {
+    IntGauge::new(
         "rtsp_active_sessions",
-        "Number of active RTSP streaming sessions (server-side)"
-    ).expect("metric can be created");
-    pub static ref ACTIVE_CLIENTS: IntGauge = IntGauge::new(
+        "Number of active RTSP streaming sessions (server-side)",
+    )
+    .expect("metric can be created")
+});
+pub static ACTIVE_CLIENTS: LazyLock<IntGauge> = LazyLock::new(|| {
+    IntGauge::new(
         "rtsp_active_clients",
-        "Number of currently connected RTSP clients"
-    ).expect("metric can be created");
-    pub static ref TOTAL_CONNECTIONS: IntCounter = IntCounter::new(
+        "Number of currently connected RTSP clients",
+    )
+    .expect("metric can be created")
+});
+pub static TOTAL_CONNECTIONS: LazyLock<IntCounter> = LazyLock::new(|| {
+    IntCounter::new(
         "rtsp_client_connections_total",
-        "Total number of RTSP client connections since server start"
-    ).expect("metric can be created");
-    pub static ref BYTES_SENT: IntCounter = IntCounter::new(
+        "Total number of RTSP client connections since server start",
+    )
+    .expect("metric can be created")
+});
+pub static BYTES_SENT: LazyLock<IntCounter> = LazyLock::new(|| {
+    IntCounter::new(
         "rtsp_bytes_sent_total",
-        "Total bytes sent to RTSP clients"
-    ).expect("metric can be created");
-}
+        "Total bytes sent to RTSP clients",
+    )
+    .expect("metric can be created")
+});
 
 pub struct PrometheusReporter;
 
